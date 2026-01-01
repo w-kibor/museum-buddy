@@ -78,7 +78,7 @@ def _get_artifact_info_google(image):
         raise ValueError("VISION_API_KEY not found in environment variables")
     
     genai.configure(api_key=api_key)
-    model = genai.GenerativeModel('gemini-1.5-pro')
+    model = genai.GenerativeModel('gemini-2.5-flash')
     
     prompt = """You are a museum curator and storyteller. Look at this museum artifact and:
 1. Identify what it is

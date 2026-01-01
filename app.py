@@ -3,7 +3,8 @@ import os
 from PIL import Image
 import io
 from vision_helper import get_artifact_info
-from voice_helper import generate_minimax_voice
+# NEW CODE
+from voice_helper import generate_elevenlabs_voice
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -46,13 +47,13 @@ def main():
     st.markdown("Upload a photo of a museum artifact and let AI bring it to life with a fascinating story!")
     st.markdown('</div>', unsafe_allow_html=True)
     
-    # Check for API keys
-    minimax_key = os.getenv('MINIMAX_API_KEY')
+   # Check for API keys
+    eleven_key = os.getenv('ELEVENLABS_API_KEY')
     vision_key = os.getenv('VISION_API_KEY')
-    
-    if not minimax_key or not vision_key:
-        st.error("⚠️ Missing API keys! Please set up your .env file with MINIMAX_API_KEY and VISION_API_KEY")
-        st.info("Copy `.env.example` to `.env` and add your API keys to get started.")
+
+    if not eleven_key or not vision_key:
+        st.error("⚠️ Missing API keys! Please update your .env file.")
+        st.info("Ensure you have added ELEVENLABS_API_KEY and VISION_API_KEY to your .env file.")
         return
     
     # File uploader
@@ -90,7 +91,7 @@ def main():
             
             # Generate audio
             with st.spinner("🎙️ Creating audio narration..."):
-                audio_data = generate_minimax_voice(artifact_story)
+                audio_data = generate_elevenlabs_voice(artifact_story)
             
             # Display audio player
             st.subheader("🔊 Audio Narration")

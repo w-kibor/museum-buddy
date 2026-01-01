@@ -1,52 +1,32 @@
-import os
-import requests
-from dotenv import load_dotenv
+import pyttsx3
 import io
 
-load_dotenv()
-
-def generate_minimax_voice(text):
+def generate_elevenlabs_voice(text):
     """
-    Generate audio from text using MiniMax Speech-02-Turbo API.
-    
-    Args:
-        text (str): Text to convert to speech (should include <#0.5#> pause tags)
-        
-    Returns:
-        bytes: Audio data in MP3 format
+    Generate speech using pyttsx3 (works with espeak or Windows TTS)
+    Returns audio bytes in WAV format
     """
-    api_key = os.getenv('MINIMAX_API_KEY')
-    if not api_key:
-        raise ValueError("MINIMAX_API_KEY not found in environment variables")
+    engine = pyttsx3.init()
     
-    url = "https://api.minimax.io/v1/text_to_speech"
+    # Optional: Configure voice properties
+    engine.setProperty('rate', 150)    # Speed of speech (default is 200)
+    engine.setProperty('volume', 0.9)  # Volume (0.0 to 1.0)
     
-    headers = {
-        "Authorization": f"Bearer {api_key}",
-        "Content-Type": "application/json"
-    }
+    # Optional: Set voice (uncomment to use specific voice)
+    # voices = engine.getProperty('voices')
+    # engine.setProperty('voice', voices[0].id)  # 0=male, 1=female typically
     
-    payload = {
-        "model": "speech-02-turbo",
-        "text": text,
-        "emotion": "happy",
-        "format": "mp3"
-    }
+    # Save to bytes
+    audio_buffer = io.BytesIO()
+    engine.save_to_file(text, 'temp_audio.wav')
+    engine.runAndWait()
     
-    try:
-        response = requests.post(url, headers=headers, json=payload, stream=True)
-        response.raise_for_status()
-        
-        # Read the audio data from the streaming response
-        audio_data = io.BytesIO()
-        for chunk in response.iter_content(chunk_size=8192):
-            if chunk:
-                audio_data.write(chunk)
-        
-        audio_data.seek(0)
-        return audio_data.getvalue()
-        
-    except requests.exceptions.RequestException as e:
-        raise Exception(f"Error calling MiniMax API: {str(e)}")
-    except Exception as e:
-        raise Exception(f"Error processing audio: {str(e)}")
+    # Read the file into bytes
+    with open('temp_audio.wav', 'rb') as f:
+        audio_bytes = f.read()
+    
+    # Clean up temp file
+    import os
+    os.remove('temp_audio.wav')
+    
+    return audio_bytes
